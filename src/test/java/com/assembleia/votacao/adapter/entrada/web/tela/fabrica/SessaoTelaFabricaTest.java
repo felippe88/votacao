@@ -23,7 +23,8 @@ class SessaoTelaFabricaTest {
     @BeforeEach
     void configurar() {
         PropriedadesAplicacao propriedades = new PropriedadesAplicacao(
-                "http://localhost:8080", new PropriedadesAplicacao.Sessao(60));
+                "http://localhost:8080", new PropriedadesAplicacao.Sessao(60),
+                new PropriedadesAplicacao.IntegracaoCpf("https://user-info.herokuapp.com"));
         sessaoTelaFabrica = new SessaoTelaFabrica(propriedades);
     }
 
