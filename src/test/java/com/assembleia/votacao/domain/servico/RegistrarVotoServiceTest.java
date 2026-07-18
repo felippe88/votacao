@@ -1,10 +1,12 @@
 package com.assembleia.votacao.domain.servico;
 
+import com.assembleia.votacao.domain.exception.AssociadoNaoAptoException;
 import com.assembleia.votacao.domain.exception.SessaoEncerradaException;
 import com.assembleia.votacao.domain.model.OpcaoVoto;
 import com.assembleia.votacao.domain.model.SessaoVotacao;
 import com.assembleia.votacao.domain.model.Voto;
 import com.assembleia.votacao.domain.port.saida.SessaoVotacaoRepositorio;
+import com.assembleia.votacao.domain.port.saida.VerificadorElegibilidadeAssociado;
 import com.assembleia.votacao.domain.port.saida.VotoRepositorio;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,6 +20,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -34,11 +37,14 @@ class RegistrarVotoServiceTest {
     @Mock
     private SessaoVotacaoRepositorio sessaoVotacaoRepositorio;
 
+    @Mock
+    private VerificadorElegibilidadeAssociado verificadorElegibilidadeAssociado;
+
     @InjectMocks
     private RegistrarVotoService registrarVotoService;
 
     @Test
-    void deveRegistrarVotoQuandoSessaoAberta() {
+    void deveRegistrarVotoQuandoSessaoAbertaEAssociadoApto() {
         Instant agora = Instant.now();
         SessaoVotacao sessao = new SessaoVotacao(1L, PAUTA_ID, agora.minusSeconds(10), agora.plusSeconds(50));
         when(sessaoVotacaoRepositorio.buscarPorPautaId(PAUTA_ID)).thenReturn(Optional.of(sessao));
@@ -49,6 +55,7 @@ class RegistrarVotoServiceTest {
         assertThat(voto.pautaId()).isEqualTo(PAUTA_ID);
         assertThat(voto.associadoId()).isEqualTo(ASSOCIADO_ID);
         assertThat(voto.opcao()).isEqualTo(OpcaoVoto.SIM);
+        verify(verificadorElegibilidadeAssociado).verificar(ASSOCIADO_ID);
         verify(votoRepositorio).salvar(any(Voto.class));
     }
 
@@ -58,6 +65,7 @@ class RegistrarVotoServiceTest {
 
         assertThatThrownBy(() -> registrarVotoService.registrar(PAUTA_ID, ASSOCIADO_ID, OpcaoVoto.SIM))
                 .isInstanceOf(SessaoEncerradaException.class);
+        verify(verificadorElegibilidadeAssociado, never()).verificar(any());
         verify(votoRepositorio, never()).salvar(any(Voto.class));
     }
 
@@ -69,6 +77,20 @@ class RegistrarVotoServiceTest {
 
         assertThatThrownBy(() -> registrarVotoService.registrar(PAUTA_ID, ASSOCIADO_ID, OpcaoVoto.SIM))
                 .isInstanceOf(SessaoEncerradaException.class);
+        verify(verificadorElegibilidadeAssociado, never()).verificar(any());
+        verify(votoRepositorio, never()).salvar(any(Voto.class));
+    }
+
+    @Test
+    void deveLancarExcecaoQuandoAssociadoNaoApto() {
+        Instant agora = Instant.now();
+        SessaoVotacao sessao = new SessaoVotacao(1L, PAUTA_ID, agora.minusSeconds(10), agora.plusSeconds(50));
+        when(sessaoVotacaoRepositorio.buscarPorPautaId(PAUTA_ID)).thenReturn(Optional.of(sessao));
+        doThrow(new AssociadoNaoAptoException(ASSOCIADO_ID))
+                .when(verificadorElegibilidadeAssociado).verificar(ASSOCIADO_ID);
+
+        assertThatThrownBy(() -> registrarVotoService.registrar(PAUTA_ID, ASSOCIADO_ID, OpcaoVoto.SIM))
+                .isInstanceOf(AssociadoNaoAptoException.class);
         verify(votoRepositorio, never()).salvar(any(Voto.class));
     }
 }

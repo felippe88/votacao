@@ -3,8 +3,11 @@ package com.assembleia.votacao.adapter.entrada.web.excecao;
 import com.assembleia.votacao.adapter.entrada.web.tela.ItemTexto;
 import com.assembleia.votacao.adapter.entrada.web.tela.Tela;
 import com.assembleia.votacao.adapter.entrada.web.tela.TelaFormulario;
+import com.assembleia.votacao.domain.exception.AssociadoNaoAptoException;
+import com.assembleia.votacao.domain.exception.CpfInvalidoException;
 import com.assembleia.votacao.domain.exception.ExcecaoNegocio;
 import com.assembleia.votacao.domain.exception.PautaNaoEncontradaException;
+import com.assembleia.votacao.domain.exception.ServicoVerificacaoIndisponivelException;
 import com.assembleia.votacao.domain.exception.SessaoEncerradaException;
 import com.assembleia.votacao.domain.exception.SessaoJaAbertaException;
 import com.assembleia.votacao.domain.exception.SessaoVotacaoNaoEncontradaException;
@@ -23,7 +26,8 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 public class ManipuladorGlobalExcecoes {
 
-    @ExceptionHandler({PautaNaoEncontradaException.class, SessaoVotacaoNaoEncontradaException.class})
+    @ExceptionHandler({PautaNaoEncontradaException.class, SessaoVotacaoNaoEncontradaException.class,
+            CpfInvalidoException.class})
     public ResponseEntity<Tela> tratarNaoEncontrado(ExcecaoNegocio excecao) {
         log.warn(excecao.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(telaErro(excecao.getMessage()));
@@ -35,10 +39,16 @@ public class ManipuladorGlobalExcecoes {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(telaErro(excecao.getMessage()));
     }
 
-    @ExceptionHandler(SessaoEncerradaException.class)
-    public ResponseEntity<Tela> tratarSessaoEncerrada(SessaoEncerradaException excecao) {
+    @ExceptionHandler({SessaoEncerradaException.class, AssociadoNaoAptoException.class})
+    public ResponseEntity<Tela> tratarRegraNegocioBloqueante(ExcecaoNegocio excecao) {
         log.warn(excecao.getMessage());
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(telaErro(excecao.getMessage()));
+    }
+
+    @ExceptionHandler(ServicoVerificacaoIndisponivelException.class)
+    public ResponseEntity<Tela> tratarServicoIndisponivel(ServicoVerificacaoIndisponivelException excecao) {
+        log.error(excecao.getMessage(), excecao);
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(telaErro(excecao.getMessage()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

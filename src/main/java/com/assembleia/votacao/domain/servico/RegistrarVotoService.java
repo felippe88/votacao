@@ -6,6 +6,7 @@ import com.assembleia.votacao.domain.model.SessaoVotacao;
 import com.assembleia.votacao.domain.model.Voto;
 import com.assembleia.votacao.domain.port.entrada.RegistrarVotoUseCase;
 import com.assembleia.votacao.domain.port.saida.SessaoVotacaoRepositorio;
+import com.assembleia.votacao.domain.port.saida.VerificadorElegibilidadeAssociado;
 import com.assembleia.votacao.domain.port.saida.VotoRepositorio;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +21,7 @@ public class RegistrarVotoService implements RegistrarVotoUseCase {
 
     private final VotoRepositorio votoRepositorio;
     private final SessaoVotacaoRepositorio sessaoVotacaoRepositorio;
+    private final VerificadorElegibilidadeAssociado verificadorElegibilidadeAssociado;
 
     @Override
     public Voto registrar(Long pautaId, String associadoId, OpcaoVoto opcao) {
@@ -29,6 +31,8 @@ public class RegistrarVotoService implements RegistrarVotoUseCase {
         if (!sessao.estaAberta(Instant.now())) {
             throw new SessaoEncerradaException(pautaId);
         }
+
+        verificadorElegibilidadeAssociado.verificar(associadoId);
 
         Voto salvo = votoRepositorio.salvar(new Voto(null, pautaId, associadoId, opcao, Instant.now()));
         log.info("Voto aceito: pautaId={} associadoId={} opcao={}", pautaId, associadoId, opcao);

@@ -38,9 +38,11 @@ public class VotoController {
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Voto registrado; tela FORMULARIO informativa",
                     content = @Content(schema = @Schema(implementation = TelaFormulario.class))),
-            @ApiResponse(responseCode = "404", description = "Pauta não encontrada"),
+            @ApiResponse(responseCode = "404", description = "Pauta não encontrada, ou CPF do associado inválido/não encontrado"),
             @ApiResponse(responseCode = "409", description = "Associado já votou nesta pauta"),
-            @ApiResponse(responseCode = "422", description = "Sessão de votação encerrada ou inexistente")
+            @ApiResponse(responseCode = "422",
+                    description = "Sessão de votação encerrada ou inexistente, ou associado não apto a votar"),
+            @ApiResponse(responseCode = "503", description = "Serviço de verificação de elegibilidade indisponível")
     })
     public ResponseEntity<Tela> votar(@PathVariable Long pautaId,
                                        @Valid @RequestBody RegistrarVotoRequest request) {

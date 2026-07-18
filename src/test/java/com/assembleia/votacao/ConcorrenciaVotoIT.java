@@ -5,10 +5,14 @@ import com.assembleia.votacao.domain.model.OpcaoVoto;
 import com.assembleia.votacao.domain.port.entrada.AbrirSessaoVotacaoUseCase;
 import com.assembleia.votacao.domain.port.entrada.CadastrarPautaUseCase;
 import com.assembleia.votacao.domain.port.entrada.RegistrarVotoUseCase;
+import com.assembleia.votacao.domain.port.saida.VerificadorElegibilidadeAssociado;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -40,6 +44,16 @@ class ConcorrenciaVotoIT {
 
     @Autowired
     private RegistrarVotoUseCase registrarVotoUseCase;
+
+    @TestConfiguration
+    static class VerificacaoElegibilidadeStubConfig {
+
+        @Bean
+        @Primary
+        VerificadorElegibilidadeAssociado verificadorElegibilidadeAssociado() {
+            return cpf -> { };
+        }
+    }
 
     @Test
     void apenasUmVotoDeveSerAceitoQuandoMultiplasThreadsVotamComMesmoAssociado() throws Exception {
