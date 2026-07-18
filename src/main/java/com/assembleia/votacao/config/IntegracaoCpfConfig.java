@@ -11,8 +11,8 @@ public class IntegracaoCpfConfig {
     @Bean
     public RestClient verificacaoCpfRestClient(PropriedadesAplicacao propriedades) {
         SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
-        requestFactory.setConnectTimeout(3000);
-        requestFactory.setReadTimeout(5000);
+        requestFactory.setConnectTimeout(45000);
+        requestFactory.setReadTimeout(45000);
 
         return RestClient.builder()
                 .baseUrl(propriedades.integracaoCpf().baseUrl())

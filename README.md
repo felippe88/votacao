@@ -242,10 +242,27 @@ ambiente do serviço da API de votação (não a do mock):
 ```
 INTEGRACAO_CPF_BASE_URL=https://mock-integracao-cpf.onrender.com
 ```
-Sem essa configuração, todo voto em produção retorna `503`, pelo motivo já explicado acima. Como
-esse serviço roda no tier gratuito do Render, ele hiberna após um período de inatividade — a
-primeira chamada depois de um tempo parado pode demorar alguns segundos a mais enquanto ele
-"acorda".
+Sem essa configuração, todo voto em produção retorna `503`, pelo motivo já explicado acima.
+
+### Hibernação no tier gratuito (Render/Neon)
+
+A API de votação, o mock hospedado e o banco (Neon) rodam todos em planos gratuitos, que
+**hibernam após um período de inatividade** (não são excluídos — apenas ficam "adormecidos" até
+a próxima requisição). Isso significa que, se ninguém acessar por um tempo, a primeira chamada
+seguinte pode demorar bem mais que o normal enquanto o serviço volta a responder:
+
+- **API de votação**: se estiver hibernada, o primeiro request no Render pode levar dezenas de
+  segundos antes de sequer começar a processar.
+- **Neon (Postgres)**: se o compute estiver suspenso, a primeira query após a suspensão tem uma
+  latência extra enquanto ele é religado — normalmente poucos segundos.
+- **Mock de CPF**: mesma hibernação do Render. Por isso o timeout da chamada de verificação de
+  CPF (`IntegracaoCpfConfig`) foi configurado com folga (45s de conexão e leitura) — tempo
+  suficiente pra sobreviver a esse "acordar" sem que o voto falhe com `503` por timeout curto
+  demais, mesmo que o mock esteja frio no momento do teste.
+
+Ou seja: se uma chamada demorar bastante na primeira tentativa depois de um tempo sem uso, não é
+necessariamente um bug — é o efeito esperado de rodar em infraestrutura gratuita que hiberna. Uma
+segunda chamada logo em seguida já deve responder normalmente.
 
 ## Simulando o fluxo completo
 
