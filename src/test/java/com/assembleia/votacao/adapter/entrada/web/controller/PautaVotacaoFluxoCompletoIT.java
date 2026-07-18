@@ -65,6 +65,13 @@ class PautaVotacaoFluxoCompletoIT {
 
         mockMvc.perform(post("/api/v1/pautas/" + pautaId + "/votos")
                         .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"associadoId\":\"3\",\"opcao\":\"TALVEZ\"}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.itens[0].texto").value(
+                        "opcao: valor \"TALVEZ\" inválido. Valores aceitos: SIM, NAO"));
+
+        mockMvc.perform(post("/api/v1/pautas/" + pautaId + "/votos")
+                        .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"associadoId\":\"1\",\"opcao\":\"SIM\"}"))
                 .andExpect(status().isCreated());
 

@@ -52,7 +52,9 @@ class VerificadorElegibilidadeAssociadoAdapterTest {
     @Test
     void deveLancarExcecaoQuandoCpfInvalido() {
         servidorMock.expect(requestTo(BASE_URL + "/users/00000000000"))
-                .andRespond(withStatus(NOT_FOUND));
+                .andRespond(withStatus(NOT_FOUND)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body("{\"erro\":\"cpf nao encontrado\"}"));
 
         assertThatThrownBy(() -> adapter.verificar("00000000000"))
                 .isInstanceOf(CpfInvalidoException.class);
@@ -64,6 +66,17 @@ class VerificadorElegibilidadeAssociadoAdapterTest {
                 .andRespond(withStatus(INTERNAL_SERVER_ERROR));
 
         assertThatThrownBy(() -> adapter.verificar("33333333333"))
+                .isInstanceOf(ServicoVerificacaoIndisponivelException.class);
+    }
+
+    @Test
+    void deveLancarExcecaoDeServicoIndisponivelQuando404NaoVemDaAplicacao() {
+        servidorMock.expect(requestTo(BASE_URL + "/users/44444444444"))
+                .andRespond(withStatus(NOT_FOUND)
+                        .contentType(MediaType.TEXT_HTML)
+                        .body("<html><head><title>No such app</title></head></html>"));
+
+        assertThatThrownBy(() -> adapter.verificar("44444444444"))
                 .isInstanceOf(ServicoVerificacaoIndisponivelException.class);
     }
 }

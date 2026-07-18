@@ -5,6 +5,7 @@ import com.assembleia.votacao.domain.exception.CpfInvalidoException;
 import com.assembleia.votacao.domain.exception.ServicoVerificacaoIndisponivelException;
 import com.assembleia.votacao.domain.port.saida.VerificadorElegibilidadeAssociado;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
@@ -27,6 +28,9 @@ public class VerificadorElegibilidadeAssociadoAdapter implements VerificadorEleg
                     .retrieve()
                     .body(RespostaVerificacaoCpf.class);
         } catch (HttpClientErrorException.NotFound excecao) {
+            if (!respondeuComJson(excecao)) {
+                throw new ServicoVerificacaoIndisponivelException(cpf, excecao);
+            }
             throw new CpfInvalidoException(cpf);
         } catch (RestClientException excecao) {
             throw new ServicoVerificacaoIndisponivelException(cpf, excecao);
@@ -35,5 +39,12 @@ public class VerificadorElegibilidadeAssociadoAdapter implements VerificadorEleg
         if (resposta == null || !STATUS_APTO.equals(resposta.status())) {
             throw new AssociadoNaoAptoException(cpf);
         }
+    }
+
+    private boolean respondeuComJson(HttpClientErrorException excecao) {
+        MediaType contentType = excecao.getResponseHeaders() != null
+                ? excecao.getResponseHeaders().getContentType()
+                : null;
+        return contentType != null && contentType.isCompatibleWith(MediaType.APPLICATION_JSON);
     }
 }

@@ -8,6 +8,7 @@ import com.assembleia.votacao.domain.port.entrada.RegistrarVotoUseCase;
 import com.assembleia.votacao.domain.port.saida.SessaoVotacaoRepositorio;
 import com.assembleia.votacao.domain.port.saida.VerificadorElegibilidadeAssociado;
 import com.assembleia.votacao.domain.port.saida.VotoRepositorio;
+import com.assembleia.votacao.domain.util.MascaraCpf;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -35,7 +36,7 @@ public class RegistrarVotoService implements RegistrarVotoUseCase {
         verificadorElegibilidadeAssociado.verificar(associadoId);
 
         Voto salvo = votoRepositorio.salvar(new Voto(null, pautaId, associadoId, opcao, Instant.now()));
-        log.info("Voto aceito: pautaId={} associadoId={} opcao={}", pautaId, associadoId, opcao);
+        log.info("Voto aceito: pautaId={} associadoId={} opcao={}", pautaId, MascaraCpf.mascarar(associadoId), opcao);
         return salvo;
     }
 }

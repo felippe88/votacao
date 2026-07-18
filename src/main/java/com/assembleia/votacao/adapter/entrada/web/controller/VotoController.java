@@ -38,6 +38,7 @@ public class VotoController {
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Voto registrado; tela FORMULARIO informativa",
                     content = @Content(schema = @Schema(implementation = TelaFormulario.class))),
+            @ApiResponse(responseCode = "400", description = "Corpo inválido, incluindo opcao diferente de SIM/NAO"),
             @ApiResponse(responseCode = "404", description = "Pauta não encontrada, ou CPF do associado inválido/não encontrado"),
             @ApiResponse(responseCode = "409", description = "Associado já votou nesta pauta"),
             @ApiResponse(responseCode = "422",
