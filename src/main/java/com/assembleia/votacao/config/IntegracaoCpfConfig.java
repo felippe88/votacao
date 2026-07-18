@@ -9,12 +9,12 @@ import org.springframework.web.client.RestClient;
 public class IntegracaoCpfConfig {
 
     @Bean
-    public RestClient verificacaoCpfRestClient(RestClient.Builder builder, PropriedadesAplicacao propriedades) {
+    public RestClient verificacaoCpfRestClient(PropriedadesAplicacao propriedades) {
         SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
         requestFactory.setConnectTimeout(3000);
         requestFactory.setReadTimeout(5000);
 
-        return builder
+        return RestClient.builder()
                 .baseUrl(propriedades.integracaoCpf().baseUrl())
                 .requestFactory(requestFactory)
                 .build();
