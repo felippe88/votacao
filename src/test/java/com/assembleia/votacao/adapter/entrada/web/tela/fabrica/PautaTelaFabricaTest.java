@@ -30,7 +30,7 @@ class PautaTelaFabricaTest {
     }
 
     @Test
-    void listaPautasDeveGerarTelaSelecaoConformeAnexo1() {
+    void listaPautasDeveGerarTelaSelecaoConformeContrato() {
         List<Pauta> pautas = List.of(new Pauta(1L, "Reforma do estatuto", "desc", Instant.now()));
 
         TelaSelecao tela = pautaTelaFabrica.listaPautas(pautas);

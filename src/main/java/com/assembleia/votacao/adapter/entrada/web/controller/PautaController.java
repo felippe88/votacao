@@ -2,11 +2,15 @@ package com.assembleia.votacao.adapter.entrada.web.controller;
 
 import com.assembleia.votacao.adapter.entrada.web.dto.CadastrarPautaRequest;
 import com.assembleia.votacao.adapter.entrada.web.tela.Tela;
+import com.assembleia.votacao.adapter.entrada.web.tela.TelaFormulario;
+import com.assembleia.votacao.adapter.entrada.web.tela.TelaSelecao;
 import com.assembleia.votacao.adapter.entrada.web.tela.fabrica.PautaTelaFabrica;
 import com.assembleia.votacao.domain.model.Pauta;
 import com.assembleia.votacao.domain.port.entrada.CadastrarPautaUseCase;
 import com.assembleia.votacao.domain.port.entrada.ListarPautasUseCase;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -34,7 +38,8 @@ public class PautaController {
     @Operation(summary = "Lista as pautas cadastradas",
             description = "Retorna uma tela SELECAO com uma opção por pauta; cada opção aponta para o "
                     + "endpoint de abertura de sessão daquela pauta.")
-    @ApiResponse(responseCode = "200", description = "Tela SELECAO com a lista de pautas")
+    @ApiResponse(responseCode = "200", description = "Tela SELECAO com a lista de pautas",
+            content = @Content(schema = @Schema(implementation = TelaSelecao.class)))
     public Tela listar() {
         return pautaTelaFabrica.listaPautas(listarPautasUseCase.listar());
     }
@@ -44,7 +49,8 @@ public class PautaController {
             description = "Cria a pauta e retorna uma tela FORMULARIO de confirmação, com um botão que "
                     + "leva à abertura da sessão de votação.")
     @ApiResponses({
-            @ApiResponse(responseCode = "201", description = "Pauta cadastrada; tela FORMULARIO de confirmação"),
+            @ApiResponse(responseCode = "201", description = "Pauta cadastrada; tela FORMULARIO de confirmação",
+                    content = @Content(schema = @Schema(implementation = TelaFormulario.class))),
             @ApiResponse(responseCode = "400", description = "Título ausente ou inválido")
     })
     public ResponseEntity<Tela> cadastrar(@Valid @RequestBody CadastrarPautaRequest request) {

@@ -13,7 +13,7 @@ public class OpenApiConfig {
         return new OpenAPI().info(new Info()
                 .title("API de Votação de Assembleias")
                 .description("Cadastro de pautas, sessões de votação e apuração de resultado, "
-                        + "com contrato de tela server-driven UI para o app mobile (Anexo 1).")
+                        + "com contrato de tela server-driven UI para o app mobile.")
                 .version("v1"));
     }
 }
