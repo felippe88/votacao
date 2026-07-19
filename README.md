@@ -12,8 +12,7 @@ tela está descrito em detalhe mais abaixo.
 **Ambiente na nuvem:** a aplicação está disponível em produção (Render), com Swagger em
 [`https://votacao-0fyy.onrender.com/swagger-ui/index.html`](https://votacao-0fyy.onrender.com/swagger-ui/index.html).
 Por rodar em plano gratuito, o serviço hiberna após um período de inatividade — a primeira
-chamada depois de um tempo sem uso pode demorar bem mais que o normal (detalhes na seção
-[Hibernação no tier gratuito](#hibernação-no-tier-gratuito-rederneon)).
+chamada depois de um tempo sem uso pode demorar bem mais que o normal.
 
 ## Sumário
 
